@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HyperDex — PC Optimizer</title>
+<meta name="description" content="HyperDex é uma das melhores empresas de otimização de PCs. Ganhos absurdos de FPS e redução de Input Lag."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET & BASE ─────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06060A;
+  --bg2:#0C0C12;
+  --bg3:#111118;
+  --border:#1E1E2A;
+  --border2:#2A2A3A;
+  --text:#F0F0F8;
+  --text2:#6E6E90;
+  --text3:#2E2E44;
+  --cyan:#00D4FF;
+  --cyan2:#00A8CC;
+  --white:#FFFFFF;
+  --danger:#FF3355;
+  --success:#00E87A;
+  --r:14px;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-weight:400;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+::selection{background:var(--cyan);color:var(--bg)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── NOISE OVERLAY ───────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.4;
+}
+
+/* ── TYPOGRAPHY ──────────────────────────── */
+h1,h2,h3,h4,nav,.badge{font-family:'Syne',sans-serif}
+.display{font-size:clamp(3rem,7vw,6.5rem);font-weight:800;line-height:1.0;letter-spacing:-0.03em}
+.headline{font-size:clamp(1.8rem,4vw,3rem);font-weight:700;line-height:1.1;letter-spacing:-0.02em}
+.label{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text2)}
+
+/* ── LAYOUT ──────────────────────────────── */
+.container{max-width:1160px;margin:0 auto;padding:0 28px}
+section{padding:120px 0}
+
+/* ── GLOW DOT BG ─────────────────────────── */
+.glow{
+  position:absolute;border-radius:50%;
+  filter:blur(120px);pointer-events:none;z-index:0;
+}
+
+/* ── NAV ─────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:20px 0;
+  border-bottom:1px solid transparent;
+  transition:all .4s ease;
+}
+nav.scrolled{
+  background:rgba(6,6,10,.85);
+  backdrop-filter:blur(20px);
+  border-color:var(--border);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  max-width:1160px;margin:0 auto;padding:0 28px;
+}
+.logo{
+  font-size:1.25rem;font-weight:800;letter-spacing:-.01em;
+  color:var(--white);text-decoration:none;display:flex;align-items:center;gap:10px;
+}
+.logo-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 12px var(--cyan);animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+.nav-links{display:flex;align-items:center;gap:8px}
+.nav-links a{
+  color:var(--text2);text-decoration:none;font-size:.875rem;
+  padding:8px 14px;border-radius:8px;transition:all .2s;
+}
+.nav-links a:hover{color:var(--text);background:var(--bg3)}
+.nav-cta{
+  background:var(--cyan)!important;color:var(--bg)!important;
+  font-weight:600!important;
+}
+.nav-cta:hover{background:#33EEFF!important;transform:translateY(-1px)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;
+    flex-direction:column;background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 28px;gap:4px}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+}
+
+/* ── HERO ────────────────────────────────── */
+#hero{
+  position:relative;min-height:100vh;display:flex;align-items:center;
+  overflow:hidden;padding:0;
+}
+.hero-glow1{width:600px;height:600px;background:rgba(0,212,255,.06);top:-100px;left:-150px}
+.hero-glow2{width:400px;height:400px;background:rgba(0,212,255,.04);bottom:0;right:-100px}
+.hero-inner{position:relative;z-index:1;padding:160px 0 100px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border2);border-radius:100px;
+  padding:6px 16px 6px 8px;margin-bottom:32px;
+  font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text2);
+}
+.hero-badge-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--success);
+  box-shadow:0 0 8px var(--success);animation:pulse 2s infinite;
+}
+.hero-title{margin-bottom:12px}
+.hero-title .accent{color:var(--cyan)}
+.hero-sub{
+  font-size:clamp(1rem,2vw,1.2rem);color:var(--text2);
+  max-width:520px;margin:20px 0 44px;font-weight:300;
+}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border-radius:10px;font-size:.9rem;
+  font-weight:600;text-decoration:none;transition:all .25s;cursor:pointer;
+  font-family:'Syne',sans-serif;border:none;
+}
+.btn-primary{background:var(--cyan);color:var(--bg)}
+.btn-primary:hover{background:#33EEFF;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.25)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px)}
+.hero-stats{
+  display:flex;gap:48px;margin-top:72px;padding-top:48px;
+  border-top:1px solid var(--border);flex-wrap:wrap;
+}
+.stat-num{font-size:2rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--white)}
+.stat-label{font-size:.8rem;color:var(--text2);margin-top:2px}
+
+/* ── MARQUEE ─────────────────────────────── */
+.marquee-wrap{
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:16px 0;overflow:hidden;background:var(--bg2);
+}
+.marquee-track{display:flex;gap:0;animation:marquee 22s linear infinite}
+.marquee-item{
+  white-space:nowrap;padding:0 40px;font-size:.75rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--text3);
+  display:flex;align-items:center;gap:20px;
+}
+.marquee-item .dot{width:4px;height:4px;border-radius:50%;background:var(--cyan);opacity:.5}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── SOBRE ───────────────────────────────── */
+#sobre{background:var(--bg)}
+.sobre-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+@media(max-width:768px){.sobre-grid{grid-template-columns:1fr;gap:48px}}
+.sobre-tag{color:var(--cyan);font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px}
+.sobre-text{color:var(--text2);font-size:1.05rem;line-height:1.8;margin-top:20px}
+.sobre-cards{display:flex;flex-direction:column;gap:16px}
+.sobre-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:24px;display:flex;gap:18px;align-items:flex-start;
+  transition:border-color .2s;
+}
+.sobre-card:hover{border-color:var(--cyan)}
+.sobre-icon{
+  width:42px;height:42px;border-radius:10px;
+  background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+}
+.sobre-card h4{font-size:.95rem;font-weight:600;margin-bottom:4px}
+.sobre-card p{font-size:.85rem;color:var(--text2);line-height:1.5}
+
+/* ── PLANOS ──────────────────────────────── */
+#planos{background:var(--bg2)}
+.section-header{text-align:center;margin-bottom:64px}
+.section-header .label{margin-bottom:12px}
+.section-header h2{margin-bottom:16px}
+.section-header p{color:var(--text2);max-width:480px;margin:0 auto}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.plans-grid{grid-template-columns:1fr}}
+.plan-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r);padding:36px 30px;position:relative;
+  transition:all .3s;overflow:hidden;
+}
+.plan-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,212,255,.04) 0%,transparent 60%);
+  opacity:0;transition:.3s;
+}
+.plan-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.plan-card:hover::before{opacity:1}
+.plan-card.featured{
+  border-color:var(--cyan);
+  background:linear-gradient(135deg,rgba(0,212,255,.06) 0%,var(--bg3) 100%);
+}
+.plan-badge{
+  position:absolute;top:20px;right:20px;
+  background:var(--cyan);color:var(--bg);
+  font-size:.65rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:100px;font-family:'Syne',sans-serif;
+}
+.plan-icon{font-size:2rem;margin-bottom:20px}
+.plan-name{font-size:1.4rem;font-weight:800;margin-bottom:6px;font-family:'Syne',sans-serif}
+.plan-desc{font-size:.88rem;color:var(--text2);margin-bottom:28px;line-height:1.5}
+.plan-features{list-style:none;margin-bottom:32px;display:flex;flex-direction:column;gap:10px}
+.plan-features li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:.875rem;color:var(--text2);
+}
+.plan-features li::before{
+  content:'✓';color:var(--cyan);font-weight:700;
+  flex-shrink:0;margin-top:1px;
+}
+.plan-cta{
+  display:block;text-align:center;
+  background:var(--cyan);color:var(--bg);
+  padding:13px;border-radius:9px;
+  font-weight:700;text-decoration:none;font-family:'Syne',sans-serif;
+  font-size:.9rem;letter-spacing:.02em;
+  transition:all .25s;
+}
+.plan-cta:hover{background:#33EEFF;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.2)}
+.plan-card:not(.featured) .plan-cta{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border2);
+}
+.plan-card:not(.featured) .plan-cta:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ── DISCORD ─────────────────────────────── */
+#discord{background:var(--bg)}
+.discord-inner{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;padding:80px 60px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:40px;flex-wrap:wrap;position:relative;overflow:hidden;
+}
+.discord-glow{width:400px;height:400px;background:rgba(88,101,242,.08);top:-100px;right:-80px}
+.discord-left{position:relative;z-index:1;max-width:560px}
+.discord-icon{font-size:2.8rem;margin-bottom:20px}
+.discord-left h2{margin-bottom:16px}
+.discord-left p{color:var(--text2);font-size:1rem;line-height:1.7;margin-bottom:32px}
+.discord-stats{display:flex;gap:32px;flex-wrap:wrap}
+.d-stat-num{font-size:1.6rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--white)}
+.d-stat-label{font-size:.78rem;color:var(--text2);margin-top:2px}
+.discord-right{position:relative;z-index:1}
+.btn-discord{
+  background:#5865F2;color:#fff;
+  display:inline-flex;align-items:center;gap:12px;
+  padding:18px 36px;border-radius:12px;font-size:1rem;
+  font-weight:700;text-decoration:none;font-family:'Syne',sans-serif;
+  transition:all .25s;white-space:nowrap;
+}
+.btn-discord:hover{background:#6D7AFF;transform:translateY(-3px);box-shadow:0 12px 40px rgba(88,101,242,.35)}
+.discord-svg{width:24px;height:24px;fill:white}
+
+/* ── FAQ ─────────────────────────────────── */
+#faq{background:var(--bg2)}
+.faq-list{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:2px}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden}
+.faq-q{
+  width:100%;background:none;border:none;text-align:left;
+  color:var(--text);font-family:'Syne',sans-serif;font-size:1rem;font-weight:600;
+  padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+  gap:16px;transition:color .2s;
+}
+.faq-q:hover{color:var(--cyan)}
+.faq-icon{
+  width:24px;height:24px;border-radius:50%;
+  border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:.9rem;transition:all .3s;color:var(--text2);
+}
+.faq-item.open .faq-icon{transform:rotate(45deg);border-color:var(--cyan);color:var(--cyan)}
+.faq-a{
+  max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;
+  color:var(--text2);font-size:.95rem;line-height:1.7;
+}
+.faq-item.open .faq-a{max-height:300px;padding-bottom:20px}
+
+/* ── REDES SOCIAIS ───────────────────────── */
+#redes{background:var(--bg)}
+.redes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:680px;margin:0 auto}
+@media(max-width:600px){.redes-grid{grid-template-columns:1fr}}
+.rede-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:28px 24px;
+  display:flex;align-items:center;gap:18px;
+  text-decoration:none;transition:all .25s;
+}
+.rede-card:hover{transform:translateY(-3px);border-color:var(--border2)}
+.rede-card.tiktok:hover{border-color:#69C9D0}
+.rede-card.instagram:hover{border-color:#E1306C}
+.rede-card.discord:hover{border-color:#5865F2}
+.rede-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.rede-icon.tik{background:linear-gradient(135deg,#010101,#1A1A2E)}
+.rede-icon.ins{background:linear-gradient(135deg,#405DE6,#C13584,#F77737)}
+.rede-icon.dis{background:#5865F2}
+.rede-card h4{font-size:.95rem;font-weight:600;margin-bottom:2px}
+.rede-card p{font-size:.8rem;color:var(--text2)}
+.rede-arrow{margin-left:auto;color:var(--text3);font-size:1.1rem;transition:.2s}
+.rede-card:hover .rede-arrow{color:var(--text2);transform:translateX(3px)}
+
+/* ── CONTATO ─────────────────────────────── */
+#contato{background:var(--bg2)}
+.contato-inner{
+  max-width:620px;margin:0 auto;text-align:center;
+}
+.contato-inner p{color:var(--text2);margin:16px 0 40px;font-size:1rem}
+.contato-form{display:flex;flex-direction:column;gap:14px;text-align:left}
+.form-group label{font-size:.8rem;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;letter-spacing:.05em}
+.form-group input,
+.form-group textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);padding:13px 16px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:.9rem;
+  transition:border-color .2s;outline:none;resize:vertical;
+}
+.form-group input:focus,
+.form-group textarea:focus{border-color:var(--cyan)}
+.form-group textarea{min-height:120px}
+.btn-submit{
+  background:var(--cyan);color:var(--bg);border:none;
+  padding:14px;border-radius:10px;font-size:.95rem;
+  font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;
+  transition:all .25s;width:100%;letter-spacing:.02em;
+}
+.btn-submit:hover{background:#33EEFF;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,212,255,.2)}
+.form-note{font-size:.78rem;color:var(--text3);text-align:center;margin-top:4px}
+
+/* ── FOOTER ──────────────────────────────── */
+footer{
+  background:var(--bg);border-top:1px solid var(--border);
+  padding:60px 0 32px;
+}
+.footer-inner{
+  max-width:1160px;margin:0 auto;padding:0 28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;
+}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem}
+.footer-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{color:var(--text3);text-decoration:none;font-size:.85rem;transition:.2s}
+.footer-links a:hover{color:var(--text2)}
+.footer-copy{color:var(--text3);font-size:.8rem;width:100%;text-align:center;padding-top:32px;border-top:1px solid var(--border);margin-top:16px}
+
+/* ── ANIMATIONS ──────────────────────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+[data-delay="1"]{transition-delay:.1s}
+[data-delay="2"]{transition-delay:.2s}
+[data-delay="3"]{transition-delay:.3s}
+[data-delay="4"]{transition-delay:.4s}
+[data-delay="5"]{transition-delay:.5s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="logo">
+      <div class="logo-dot"></div>
+      HYPERDEX
+    </a>
+    <div class="hamburger" id="ham" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#planos">Planos</a>
+      <a href="#faq">FAQ</a>
+      <a href="#redes">Redes</a>
+      <a href="#contato">Contato</a>
+      <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="nav-cta btn" style="padding:8px 18px;font-size:.85rem">
+        Entrar no Discord
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="glow hero-glow1"></div>
+  <div class="glow hero-glow2"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-badge reveal">
+        <div class="hero-badge-dot"></div>
+        Otimizações Profissionais de PC
+      </div>
+      <h1 class="display hero-title reveal" data-delay="1">
+        Seu PC no<br><span class="accent">Limite Máximo.</span>
+      </h1>
+      <p class="hero-sub reveal" data-delay="2">
+        A HyperDex é uma das melhores empresas de otimização de PCs. Ganhos absurdos de FPS e redução de Input Lag que você precisa ver pra acreditar.
+      </p>
+      <div class="hero-btns reveal" data-delay="3">
+        <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="btn btn-primary">
+          ⚡ Experimentar Grátis
+        </a>
+        <a href="#planos" class="btn btn-ghost">Ver Planos →</a>
+      </div>
+      <div class="hero-stats reveal" data-delay="4">
+        <div>
+          <div class="stat-num" id="cnt-fps">+240</div>
+          <div class="stat-label">FPS de Ganho</div>
+        </div>
+        <div>
+          <div class="stat-num">–90<span style="font-size:1.2rem">%</span></div>
+          <div class="stat-label">Input Lag Reduzido</div>
+        </div>
+        <div>
+          <div class="stat-num">🚀</div>
+          <div class="stat-label">Seja Nosso 1º Cliente!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">Performance Extrema <span class="dot"></span></div>
+    <div class="marquee-item">Menos Input Lag <span class="dot"></span></div>
+    <div class="marquee-item">Mais FPS <span class="dot"></span></div>
+    <div class="marquee-item">Otimização Profissional <span class="dot"></span></div>
+    <div class="marquee-item">HyperDex Team <span class="dot"></span></div>
+    <div class="marquee-item">Windows Debloat <span class="dot"></span></div>
+    <div class="marquee-item">GPU Tweaks <span class="dot"></span></div>
+    <div class="marquee-item">Performance Extrema <span class="dot"></span></div>
+    <div class="marquee-item">Menos Input Lag <span class="dot"></span></div>
+    <div class="marquee-item">Mais FPS <span class="dot"></span></div>
+    <div class="marquee-item">Otimização Profissional <span class="dot"></span></div>
+    <div class="marquee-item">HyperDex Team <span class="dot"></span></div>
+    <div class="marquee-item">Windows Debloat <span class="dot"></span></div>
+    <div class="marquee-item">GPU Tweaks <span class="dot"></span></div>
+  </div>
+</div>
+
+<!-- SOBRE -->
+<section id="sobre">
+  <div class="container">
+    <div class="sobre-grid">
+      <div>
+        <p class="sobre-tag reveal">Quem somos</p>
+        <h2 class="headline reveal" data-delay="1">Uma empresa focada em<br><span style="color:var(--cyan)">performance real.</span></h2>
+        <p class="sobre-text reveal" data-delay="2">
+          A HyperDex nasceu com um objetivo simples: extrair o máximo do seu hardware sem comprar peça nova. Com ferramentas exclusivas e otimizações cirúrgicas, entregamos resultados que você sente na primeira partida.
+        </p>
+        <div style="margin-top:32px" class="reveal" data-delay="3">
+          <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="btn btn-primary">
+            Quero testar agora
+          </a>
+        </div>
+      </div>
+      <div class="sobre-cards">
+        <div class="sobre-card reveal" data-delay="1">
+          <div class="sobre-icon">⚡</div>
+          <div>
+            <h4>Ganho Real de FPS</h4>
+            <p>Otimizações que aumentam o FPS de forma consistente, sem instabilidade ou crashes.</p>
+          </div>
+        </div>
+        <div class="sobre-card reveal" data-delay="2">
+          <div class="sobre-icon">🎯</div>
+          <div>
+            <h4>Redução de Input Lag</h4>
+            <p>Sinta cada clique na hora certa. Reduza a latência e melhore sua precisão no jogo.</p>
+          </div>
+        </div>
+        <div class="sobre-card reveal" data-delay="3">
+          <div class="sobre-icon">🛡️</div>
+          <div>
+            <h4>Seguro e Reversível</h4>
+            <p>Ponto de restauração criado antes de qualquer otimização. Segurança em primeiro lugar.</p>
+          </div>
+        </div>
+        <div class="sobre-card reveal" data-delay="4">
+          <div class="sobre-icon">🔧</div>
+          <div>
+            <h4>Suporte no Discord</h4>
+            <p>Nossa equipe está no Discord para te ajudar em qualquer etapa do processo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section id="planos">
+  <div class="container">
+    <div class="section-header">
+      <p class="label reveal">Nossos Planos</p>
+      <h2 class="headline reveal" data-delay="1">Escolha seu nível<br>de performance</h2>
+      <p class="reveal" data-delay="2">Consulte o preço no nosso Discord. Nossa equipe te orienta na melhor escolha.</p>
+    </div>
+    <div class="plans-grid">
+      <!-- BASIC -->
+      <div class="plan-card reveal" data-delay="1">
+        <div class="plan-icon">🔹</div>
+        <div class="plan-name">Basic</div>
+        <div class="plan-desc">Ideal para quem quer começar a sentir a diferença com otimizações essenciais.</div>
+        <ul class="plan-features">
+          <li>Ponto de Restauração</li>
+          <li>Atualizações Windows (DirectX + VisualC++)</li>
+          <li>Otimização do Sistema</li>
+          <li>Aumento de FPS</li>
+          <li>Limpeza do PC</li>
+        </ul>
+        <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="plan-cta">Comprar no Discord →</a>
+      </div>
+      <!-- PREMIUM -->
+      <div class="plan-card featured reveal" data-delay="2">
+        <div class="plan-badge">Popular</div>
+        <div class="plan-icon">💎</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-desc">O equilíbrio perfeito entre performance e estabilidade. O mais escolhido.</div>
+        <ul class="plan-features">
+          <li>Tudo do Basic</li>
+          <li>Apps de Otimização (DDU, ISLC, MSI Util)</li>
+          <li>Windows Debloat</li>
+          <li>Desativar Serviços Desnecessários</li>
+          <li>FPS + Input Lag Avançado</li>
+          <li>Otimizar RAM</li>
+          <li>Tweaks de GPU</li>
+          <li>Melhora de Disco HDD/SSD</li>
+        </ul>
+        <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="plan-cta">Comprar no Discord →</a>
+      </div>
+      <!-- ADVANCED -->
+      <div class="plan-card reveal" data-delay="3">
+        <div class="plan-icon">⚡</div>
+        <div class="plan-name">Advanced</div>
+        <div class="plan-desc">Para quem quer extrair o absoluto máximo do hardware. Performance extrema.</div>
+        <ul class="plan-features">
+          <li>Tudo do Premium</li>
+          <li>Tweaks Avançados de Rede</li>
+          <li>Estabilidade de FPS dedicada</li>
+          <li>Regedits exclusivos de Input Lag</li>
+          <li>Limpeza Avançada do PC + Rede</li>
+          <li>Configurações Windows Profissionais</li>
+          <li>Suporte Prioritário no Discord</li>
+        </ul>
+        <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="plan-cta">Comprar no Discord →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCORD -->
+<section id="discord" style="padding:80px 0">
+  <div class="container">
+    <div class="discord-inner">
+      <div class="glow discord-glow"></div>
+      <div class="discord-left">
+        <div class="discord-icon">🎮</div>
+        <h2 class="headline reveal">Entre na nossa<br>comunidade</h2>
+        <p class="reveal" data-delay="1">
+          Nosso Discord é onde tudo acontece — suporte, novidades, resultados de clientes e muito mais. Junte-se a centenas de gamers que já sentiram a diferença.
+        </p>
+        <div class="discord-stats reveal" data-delay="2">
+          <div>
+            
+            
+          </div>
+          <div>
+            <div class="d-stat-num">8h</div>
+            <div class="d-stat-label">Suporte (9h–17h)</div>
+          </div>
+          <div>
+            <div class="d-stat-num">100%</div>
+            <div class="d-stat-label">Satisfação</div>
+          </div>
+        </div>
+      </div>
+      <div class="discord-right reveal" data-delay="2">
+        <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="btn-discord">
+          <svg class="discord-svg" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.132 18.115a19.904 19.904 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          Entrar no Discord
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-header">
+      <p class="label reveal">Dúvidas Frequentes</p>
+      <h2 class="headline reveal" data-delay="1">Perguntas frequentes</h2>
+    </div>
+    <div class="faq-list" id="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">As otimizações são seguras?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Sim! Antes de qualquer otimização criamos um ponto de restauração do sistema. Se algo não ficar do seu agrado, você pode voltar ao estado original em segundos.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Funciona em qualquer PC?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Nossas otimizações funcionam em Windows 10 e Windows 11. O ganho pode variar dependendo das especificações do hardware, mas todos os clientes relatam melhoras significativas.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Qual a diferença entre os planos?<span class="faq-icon">+</span></button>
+        <div class="faq-a">O Basic cobre as otimizações essenciais. O Premium adiciona ferramentas avançadas e tweaks de GPU. O Advanced é o pacote completo com tudo que temos, incluindo otimizações de rede e suporte prioritário.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Como recebo o produto após a compra?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Após a compra pelo Discord, nossa equipe envia sua key de acesso e o launcher exclusivo HyperDex. Todo o processo é feito pelo nosso servidor do Discord com suporte em tempo real.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Preciso de conhecimento técnico?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Não! O HyperDex Launcher foi feito para ser simples. Com poucos cliques você executa as otimizações. E nossa equipe está no Discord para te guiar em qualquer dúvida.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Tem suporte após a compra?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Sim! Nosso Discord tem suporte disponível. Planos Advanced contam com atendimento prioritário.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REDES SOCIAIS -->
+<section id="redes" style="padding:100px 0">
+  <div class="container">
+    <div class="section-header">
+      <p class="label reveal">Redes Sociais</p>
+      <h2 class="headline reveal" data-delay="1">Nos siga nas redes</h2>
+      <p class="reveal" data-delay="2">Acompanhe novidades, resultados e dicas de performance.</p>
+    </div>
+    <div class="redes-grid">
+      <a href="https://www.tiktok.com/@hyperdexgroup" target="_blank" class="rede-card tiktok reveal" data-delay="1">
+        <div class="rede-icon tik">🎵</div>
+        <div>
+          <h4>TikTok</h4>
+          <p>@hyperdexgroup</p>
+        </div>
+        <span class="rede-arrow">→</span>
+      </a>
+      <a href="https://www.instagram.com/hyperdexoptimizer/" target="_blank" class="rede-card instagram reveal" data-delay="2">
+        <div class="rede-icon ins">📸</div>
+        <div>
+          <h4>Instagram</h4>
+          <p>@hyperdexoptimizer</p>
+        </div>
+        <span class="rede-arrow">→</span>
+      </a>
+      <a href="https://discord.gg/mDb8xXaqkG" target="_blank" class="rede-card discord reveal" data-delay="3" style="grid-column:1/-1">
+        <div class="rede-icon dis">💬</div>
+        <div>
+          <h4>Discord</h4>
+          <p>Servidor Oficial HyperDex — Suporte, compras e comunidade</p>
+        </div>
+        <span class="rede-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section id="contato">
+  <div class="container">
+    <div class="contato-inner">
+      <p class="label reveal">Contato</p>
+      <h2 class="headline reveal" data-delay="1">Fale com a gente</h2>
+      <p class="reveal" data-delay="2">Prefere o contato direto pelo Discord? Entre no servidor que respondemos rapidinho.</p>
+      <form class="contato-form reveal" data-delay="3"
+            action="https://formsubmit.co/hyperdexgroup@proton.me"
+            method="POST">
+        <!-- FormSubmit config -->
+        <input type="hidden" name="_subject" value="Nova mensagem — HyperDex Site"/>
+        <input type="hidden" name="_captcha" value="false"/>
+        <input type="hidden" name="_template" value="table"/>
+        <input type="hidden" name="_next" value="https://discord.gg/mDb8xXaqkG"/>
+
+        <div class="form-group">
+          <label>Seu nome</label>
+          <input type="text" name="nome" placeholder="Como podemos te chamar?" required/>
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" name="email" placeholder="seu@email.com" required/>
+        </div>
+        <div class="form-group">
+          <label>Mensagem</label>
+          <textarea name="mensagem" placeholder="Sua dúvida ou mensagem..." required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Enviar Mensagem</button>
+        <p class="form-note">Após enviar, você será redirecionado ao nosso Discord. ✓</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">HYPERDEX <span style="color:var(--text3)">— PC Optimizer</span></div>
+    <div class="footer-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#planos">Planos</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://discord.gg/mDb8xXaqkG" target="_blank">Discord</a>
+      <a href="https://www.tiktok.com/@hyperdexgroup" target="_blank">TikTok</a>
+      <a href="https://www.instagram.com/hyperdexoptimizer/" target="_blank">Instagram</a>
+    </div>
+    <div class="footer-copy">© 2026 HyperDex Team. Todos os direitos reservados.</div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('nav-links').classList.toggle('open');
+}
+document.querySelectorAll('#nav-links a').forEach(a=>a.addEventListener('click',()=>{
+  document.getElementById('nav-links').classList.remove('open');
+}));
+
+// Reveal on scroll
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item = btn.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!isOpen) item.classList.add('open');
+  });
+});
+
+// Form submit
+function sendForm(){
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '✓ Enviado! Entraremos em contato.';
+  btn.style.background = 'var(--success)';
+  setTimeout(()=>{
+    btn.textContent = 'Enviar Mensagem';
+    btn.style.background = '';
+  }, 3000);
+}
+
+// Smooth active nav links
+const sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{
+    if(window.scrollY >= s.offsetTop - 120) current = s.getAttribute('id');
+  });
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    a.style.color = a.getAttribute('href')==='#'+current ? 'var(--cyan)' : '';
+  });
+},{passive:true});
+</script>
+</body>
+</html>
